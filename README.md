@@ -1,67 +1,307 @@
-# Moodify - 虚拟人物情绪歌词生成器
+# Moodify
 
-## 快速开始
+> **The Ear of AI.**
+>
+> Moodify is an **Auditory Intelligence System** for AI-generated audio and music.
 
-### 1. 安装依赖
+Its primary question is: **Can machines learn to hear?**
+
+**中文定位：Moodify 是 AI 的耳朵。**
+
+Moodify is built to help AI systems **listen, represent, judge, intervene, verify, and learn from sound**. It does not generate another song on top of a song. It develops a structured understanding of what is happening in audio, preserves evidence, and turns repeated production cases into reusable auditory knowledge.
+
+```text
+Listen
+  -> Represent
+  -> Judge
+  -> Intervene
+  -> Verify
+  -> Learn
+  -> Next Case
+```
+
+## Why Moodify Exists
+
+AI can generate enormous amounts of audio, but generation and listening are different capabilities.
+
+A generative model may create a track without having a reliable engineering system that can answer:
+
+- What actually happened in the waveform and spectrum?
+- Is the result stable, distorted, unbalanced, phase-problematic, overly dense, or structurally inconsistent?
+- What parts of the judgment are measurable?
+- If an intervention is made, did it actually improve the target condition?
+- Can the evidence from this case improve the next case?
+
+Moodify does not outsource judgment to subjective listening. Since 2026-08-11,
+case ranking is produced by a deterministic algorithmic reviewer
+(`moodify.data_factory.algorithmic_review`, formula `MFY-ALGO-REVIEW-FORMULA-001`)
+over frozen measurement judgments — Moodify is the ear of AI, and the loop is
+fully machine-operated.
+
+Moodify is designed around those questions.
+
+## Auditory Intelligence
+
+Moodify treats listening as an engineering and research problem.
+
+### 1. Listen
+
+Acquire the audio and establish a trustworthy source identity.
+
+### 2. Represent
+
+Convert sound into measurable and structured representations:
+
+- waveform;
+- spectrum;
+- loudness;
+- dynamics;
+- phase;
+- channel relationships;
+- residuals;
+- transients;
+- musical structure where available.
+
+### 3. Judge
+
+Produce explicit, inspectable judgments rather than hiding the result behind a single “quality score”.
+
+### 4. Intervene
+
+Apply controlled changes only when there is a reason to do so.
+
+Existing DSP and post-processing functions belong here. They are the **Auditory Intervention Laboratory**, not the identity of Moodify itself.
+
+### 5. Verify
+
+Compare before and after states, preserve evidence, and reject unsupported claims of improvement.
+
+### 6. Learn
+
+Convert production cases into reusable measurements, evidence, rules, benchmarks and research questions.
+
+---
+
+## Three Engineering / Research Disciplines
+
+### WSE — Wave-Spectral Evolution
+
+**Question:** What happened in the sound?
+
+WSE studies waveform, spectrum, loudness, phase, channels, residuals, transients and other measurable acoustic behavior.
+
+### MSE — Musical-Structural Engineering
+
+**Question:** What is the musical structure?
+
+MSE studies MIDI, score, rhythm, phrases, sections, lyrics, roles and structural relationships.
+
+### PPE — Production Process Engineering
+
+**Question:** How can this be produced and verified reliably?
+
+PPE studies production cases, state transitions, evidence artifacts, quality gates, reproducibility, authority boundaries, packaging, failure and recovery.
+
+---
+
+## The Learning / Asset Loop
+
+```text
+Production Case
+  -> Measurement Record
+  -> Evidence Artifact
+  -> Theory Update
+  -> Moodify Rule Update
+  -> Next Production Case
+```
+
+Moodify is not only a collection of functions. Its long-term value comes from the accumulation of **traceable auditory evidence and reusable production knowledge**.
+
+---
+
+## Current Implementation Status — August 2026 Data Foundation
+
+Moodify is converging to **Moodify 1.0 — Data Foundation** (freeze target 2026-08-31).
+The canonical production loop is:
+
+```text
+SOURCE -> LISTEN -> REPRESENT -> JUDGE -> ABC INTERVENTION -> VERIFY
+       -> ALGORITHMIC REVIEW -> DATASET -> NEXT CASE
+```
+
+One real song produces a versioned `ProductionCase` with before-scan, diagnosis,
+A/B/C intervention plans (A=conservative, B=balanced, C=exploratory, derived
+from the diagnosis), three candidates, after-scans, source-vs-candidate
+comparisons, an algorithmic review record, and deterministic pairwise dataset
+rows — without manual file surgery.
+
+Current capabilities:
+
+- standards-backed measurement (BS.1770-4 loudness, EBU 3342 LRA, true-peak,
+  clipping, DC, spectral and band-energy descriptors) — see
+  [Metric Registry](docs/metrics/METRIC_REGISTRY_V1.md);
+- deterministic reference audio suite (10 fixtures, hashes, expected values) —
+  [Reference Suite](moodify-core-package/benchmarks/reference_audio/REFERENCE_SUITE.md);
+- diagnosis-derived ABC intervention plans and reproducible DSP candidates;
+- deterministic algorithmic review replacing human blind ranking;
+- evidence manifests with artifact hashes; failed jobs fail closed;
+- 24/7 unattended data node (single worker, queue survives restarts);
+- cross-machine repeatability: 52/52 metrics identical across OS/Python
+  versions (2026-08-11);
+- API/CLI interfaces and a local-first Android client.
+
+Not every research concept in this repository is production-ready. Experimental
+and legacy systems are explicitly distinguished from the canonical mainline
+(see [Legacy & Experimental Policy](docs/LEGACY_AND_EXPERIMENTAL_POLICY.md)).
+
+---
+
+## What Moodify Is Not
+
+Moodify is not:
+
+- a text-to-music generation model;
+- a DAW replacement;
+- an automatic-mastering promise;
+- a guarantee that every processed file becomes “better”;
+- a collection of presets presented as intelligence;
+- a black-box score without evidence.
+
+---
+
+## Repository Authority
+
+The repository is organized conceptually into four layers:
+
+```text
+Moodify
+├── Auditory Intelligence Core
+│   ├── WSE
+│   ├── MSE
+│   └── PPE
+│
+├── Production Runtime
+│   ├── Cases
+│   ├── Evidence
+│   ├── Rules
+│   ├── Gates
+│   └── Recovery
+│
+├── Application Layer
+│   ├── API
+│   ├── App
+│   └── Cloud
+│
+└── Asset Layer
+    ├── Measurement Records
+    ├── Production Cases
+    ├── Treatment Records
+    ├── Benchmarks
+    └── Research Corpus
+```
+
+See:
+
+- `docs/AUDITORY_INTELLIGENCE_ARCHITECTURE.md`
+- `docs/ASSET_MODEL.md`
+- `docs/LEGACY_AND_EXPERIMENTAL_POLICY.md`
+- `docs/REPOSITORY_STATUS.md`
+
+---
+
+## Scientific Release Assets
+
+- **Repository constitution:** [PHASE1_CONSTITUTION.md](docs/PHASE1_CONSTITUTION.md),
+  [CODE_FREEZE_POLICY.md](docs/CODE_FREEZE_POLICY.md)
+- **Data protocol:** [DATA_PROTOCOL_V1.md](docs/contracts/DATA_PROTOCOL_V1.md) (frozen)
+- **Metric registry:** [METRIC_REGISTRY_V1.md](docs/metrics/METRIC_REGISTRY_V1.md)
+- **Reference audio suite:** [REFERENCE_SUITE.md](moodify-core-package/benchmarks/reference_audio/REFERENCE_SUITE.md)
+- **Golden Production Case:** [examples/golden_case](examples/golden_case/)
+- **Benchmark:** reference-suite expected values + cross-machine report
+  (`moodify-core-package/benchmarks/reference_audio/expected/`)
+- **Citation:** [CITATION.cff](CITATION.cff)
+
+## Scope and Limitations
+
+- The current mainline measures and intervenes on **audio**; musical-structure
+  (MSE) and some research/experimental modules are not part of the frozen
+  1.0 surface.
+- Metrics are trustworthy only under the frozen scan profile
+  (`MFY-WSE-SCAN-PROFILE-001`); any profile change requires a new version and
+  explicit data separation.
+- The algorithmic reviewer is a deterministic technical ranking, not a claim
+  about artistic quality.
+- No private audio, API keys or unauthorized datasets are committed.
+
+---
+
+## Core Python Package
+
+The currently stable local engine lives in:
+
+```text
+moodify-core-package/
+```
+
+Install:
 
 ```bash
-pip install -r requirements.txt
+cd moodify-core-package
+pip install -e .
 ```
 
-### 2. 配置 API Key
-
-复制 `.env.example` 为 `.env`，然后填入你的 DeepSeek API Key：
+Development installation:
 
 ```bash
-copy .env.example .env
+pip install -e ".[dev]"
 ```
 
-然后编辑 `.env` 文件，将 `your_api_key_here` 替换为你的实际 API Key。
-
-### 3. 运行应用
+Example CLI usage:
 
 ```bash
-cd c:\Users\Administrator\Desktop\moodify
-streamlit run app.py
+moodify presets
+moodify analyze song.wav
+moodify process song.wav --preset clean_master
 ```
 
-## 功能
+The CLI examples above represent the current narrow implementation, not the final boundary of Moodify.
 
-- 创建和管理虚拟人物（性格、背景故事、音乐风格偏好）
-- 设置人物当前情绪状态
-- 基于人物设定和情绪生成歌词
-- 支持手动编辑和导出歌词
+---
 
-## 项目结构
+## Development Principle
 
-```
-moodify/
-├── app.py              # Streamlit 主界面
-├── character.py        # 虚拟人物管理
-├── o3ics_generator.py # DeepSeek API 歌词生成
-├── storage.py          # 数据持久化
-├── .env                # 环境变量（API Key）
-├── .env.example        # 环境变量模板
-└── requirements.txt    # Python 依赖
-```
+> Identity comes before feature expansion.
 
-## 获取 DeepSeek API Key
+Before adding a new subsystem, ask:
 
-1. 访问 https://platform.deepseek.com
-2. 注册/登录账号
-3. 在 API Keys 页面创建新的 API Key
-4. 将生成的 Key 填入 `.env` 文件
+1. Which part of auditory intelligence does it serve?
+2. What evidence does it create?
+3. Where does that evidence live?
+4. Is it canonical, experimental or legacy?
+5. Does it improve the next production case?
 
-## 使用说明
+A new feature that cannot answer these questions should not automatically become part of the mainline.
 
-1. 首次运行会自动创建 `data` 目录和示例人物
-2. 在左侧面板创建/选择虚拟人物
-3. 设置人物的当前情绪
-4. 点击"生成歌词"按钮
-5. 生成的歌词可手动编辑，点击按钮复制
+---
 
-## 技术栈
+## Data and Privacy
 
-- **前端**: Streamlit
-- **AI**: DeepSeek API (deepseek-chat)
-- **存储**: 本地 JSON 文件
+The core workflow can be local-first.
+
+Do not commit:
+
+- private audio;
+- API keys;
+- unauthorized datasets;
+- generated heavy artifacts;
+- local IDE state.
+
+External models, APIs, audio and datasets retain their own licenses and rights.
+
+---
+
+## License
+
+Moodify is licensed under **GNU GPL v3.0 only** unless otherwise stated.
+
+See `LICENSE`.
