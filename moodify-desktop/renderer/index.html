@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' file:; style-src 'self'">
+  <title>Moodify Studio</title>
+  <link rel="stylesheet" href="vendor/xterm.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 顶栏：logo + 当前世界名。无关闭：世界不关闭，只切换。 -->
+  <header id="topbar">
+    <img class="logo" src="assets/moodify_logo.png" alt="Moodify">
+    <div id="case-title" hidden>
+      <h1 id="source-name"></h1>
+    </div>
+    <div class="top-actions">
+      <span id="status-line" class="muted" hidden></span>
+      <button id="perm-toggle" class="ghost" title="AI 编译器权限模式">权限：标准</button>
+    </div>
+  </header>
+
+  <div id="main-row">
+    <!-- 左图标栏：1 打开 / 2 修音 / 3 世界（时钟=世界历史；视图主体走顶部标签页） -->
+    <nav id="rail">
+      <button id="rail-open" title="打开音频文件（创建/进入世界）" aria-label="打开音频文件">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 6.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>
+      </button>
+      <button id="rail-fix" title="修音工作台" aria-label="修音工作台">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 4v16M12 4v16M19 4v16"/><circle cx="5" cy="9" r="2.2"/><circle cx="12" cy="15" r="2.2"/><circle cx="19" cy="7" r="2.2"/></svg>
+      </button>
+      <button id="rail-stems" title="分离工作台（四轨分离）" aria-label="分离工作台">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l9 5.5-9 5.5-9-5.5z"/><path d="M3.5 14.5l8.5 5.2 8.5-5.2"/></svg>
+      </button>
+      <button id="rail-score" title="曲谱工作台（音频 → MIDI → 曲谱）" aria-label="曲谱工作台">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18.5V6l10-2v11.5"/><circle cx="6.5" cy="18.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/></svg>
+      </button>
+      <button id="rail-history" title="世界（双击进入；时钟=世界历史）" aria-label="世界">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+      </button>
+    </nav>
+
+    <!-- 世界面板：从左滑出，可收起；双击 = 进入该世界（不关闭当前） -->
+    <aside id="history-panel" hidden>
+      <table class="data">
+        <thead><tr>
+          <th>源文件</th><th>分析时间</th><th>状态</th><th>判定</th>
+        </tr></thead>
+        <tbody id="archive-body"></tbody>
+      </table>
+      <p class="muted archive-path" id="archive-path"></p>
+    </aside>
+
+    <!-- 中央工作区：顶部标签页按来源分——波谱=音乐本身，图表/数据=检测产物 -->
+    <main id="workspace">
+      <nav id="tabs" hidden>
+        <button class="tab" id="tab-data">数据</button>
+        <button class="tab" id="tab-spectrum">频谱</button>
+        <button class="tab" id="tab-charts">图表</button>
+      </nav>
+      <div id="views">
+        <!-- 产品水印：透明底纹，常驻工作区背景层；结果内容叠加其上，不占布局 -->
+        <img id="wm" src="assets/moodify_watermark.png" alt="">
+        <section id="view-empty" class="workspace-view"></section>
+
+        <section id="view-data" class="workspace-view" hidden>
+          <table class="data">
+            <thead><tr><th>指标</th><th>值</th><th>单位</th><th>状态</th><th>组</th></tr></thead>
+            <tbody id="measure-body"></tbody>
+          </table>
+          <div id="plan-body"></div>
+        </section>
+
+        <section id="view-spectrum" class="workspace-view" hidden>
+          <div id="spectrum-body" class="charts"></div>
+        </section>
+
+        <section id="view-charts" class="workspace-view" hidden>
+          <div id="charts-body" class="charts"></div>
+        </section>
+
+        <section id="view-bench" class="workspace-view" hidden>
+          <div id="bench-head">
+            <span class="drawer-actions" id="bench-transport">
+              <button id="bench-play" class="ghost" title="播放 / 暂停（空格）">▶</button>
+              <span id="bench-time">0:00.0</span>
+            </span>
+            <span class="drawer-actions" id="bench-zoom">
+              <button id="zoom-out" class="ghost" title="缩小">－</button>
+              <button id="zoom-in" class="ghost" title="放大">＋</button>
+              <button id="zoom-fit" class="ghost" title="适配全曲">适配</button>
+            </span>
+          </div>
+          <div class="bench-tracks">
+            <div class="track" id="source-track" hidden>
+              <div class="track-strip">
+                <div id="ruler-source" class="ws-ruler"></div>
+                <div id="wave-source" class="ws-wave"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 分离工作台：引擎 A=DSP 快速分离（本壳自带）；模型精分离后续接入 -->
+        <section id="view-stems" class="workspace-view" hidden>
+          <div id="stems-head">
+            <button id="stems-run" class="primary">快速分离</button>
+            <span class="muted stems-engine">引擎：DSP 中置估计 + HPSS（非模型）</span>
+          </div>
+          <div id="stems-progress" class="tool-progress" hidden></div>
+          <div class="bench-tracks" id="stems-tracks"></div>
+        </section>
+
+        <!-- 曲谱工作台：音频 → MIDI（basic-pitch）→ MusicXML（music21）→ 壳内渲染（OSMD） -->
+        <section id="view-score" class="workspace-view" hidden>
+          <div class="score-actions">
+            <select id="score-audio" title="选择音频（源或分离轨）"></select>
+            <button id="score-to-midi" class="primary">转 MIDI</button>
+            <select id="score-midi" title="选择 MIDI"></select>
+            <button id="score-render" class="primary">生成曲谱</button>
+          </div>
+          <div id="score-progress" class="tool-progress" hidden></div>
+          <div id="score-sheet"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- 工程终端：默认隐藏，纯工程面（ffmpeg/python/CLI）；无 AI 通道 -->
+  <div id="drawer" hidden>
+    <div id="drawer-bar" title="拖拽调高度，双击收起">
+      <span class="muted" id="term-cwd"></span>
+      <span class="drawer-actions">
+        <button id="drawer-toggle" class="ghost" title="收起终端">▾</button>
+      </span>
+    </div>
+    <div id="terminal"></div>
+  </div>
+
+  <!-- 意图命令条 = Mood 编译器之家：写文字 → DeepSeek 回答与操作；唯一 AI 门。
+       平时只有一条输入框+发送；开始对话后抽屉对话区出现（可拖动/可收起）。 -->
+  <div id="intent-dock">
+    <div id="stream-bar" hidden title="拖动调高度，双击收起/展开对话">
+      <span id="stream-dot" hidden></span>
+      <span class="grip">⋯</span>
+      <span class="drawer-actions">
+        <button id="compiler-save" class="ghost" hidden title="把最后一条方案存为 plan.md">保存方案</button>
+        <button id="compiler-stop" class="ghost" hidden>停止</button>
+      </span>
+    </div>
+    <div id="compiler-stream" class="compiler-stream" hidden></div>
+    <!-- 首次使用：内核与模型提供方设置（安装时可选，随时可改） -->
+    <div id="compiler-setup" class="compiler-setup" hidden>
+      <div class="setup-row">
+        <label>模型提供方</label>
+        <select id="setup-kind">
+          <option value="deepseek">DeepSeek</option>
+          <option value="openai">OpenAI</option>
+          <option value="custom">自定义（OpenAI 兼容）</option>
+        </select>
+        <label>模型</label>
+        <input id="setup-model" type="text" placeholder="deepseek-v4-pro">
+        <input id="setup-baseurl" type="text" placeholder="https://…/v1/" hidden>
+      </div>
+      <div class="setup-row">
+        <label>API Key</label>
+        <input id="setup-key" type="password" placeholder="粘贴密钥（仅存本机 ~/.moodify/codex）">
+        <button id="setup-save" class="primary">保存并启动</button>
+      </div>
+      <p class="muted caption" id="setup-status"></p>
+    </div>
+    <p class="muted caption" id="compiler-note" hidden></p>
+    <div class="dock-input-row">
+      <textarea id="compiler-input" rows="1" title="直接输入，⏎ 发送"></textarea>
+      <button id="compiler-send" class="primary">发送</button>
+      <button id="drawer-toggle2" class="ghost" title="工程终端（ffmpeg / python / CLI）">⌘_</button>
+    </div>
+  </div>
+
+  <script src="vendor/xterm.js"></script>
+  <script src="vendor/addon-fit.js"></script>
+  <!-- wavesurfer.js 6.6.4 (BSD-3-Clause) © katspaugh & contributors — 修音/混音工作台波形引擎 -->
+  <script src="vendor/wavesurfer.min.js"></script>
+  <script src="vendor/wavesurfer.timeline.min.js"></script>
+  <!-- OpenSheetMusicDisplay 1.9.4 (BSD-3-Clause) © PhonicScore — 曲谱工作台渲染引擎 -->
+  <script src="vendor/opensheetmusicdisplay.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
